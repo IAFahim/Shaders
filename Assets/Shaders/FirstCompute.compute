@@ -2,13 +2,20 @@
 #pragma kernel SolidYellow
 #pragma kernel SplitScreen
 #pragma kernel Circle
+#pragma kernel Squire
 
 RWTexture2D<float4> Result;
 int texResolution;
 
-float inCircle(float2 pt, float radius)
+float inCircle(float2 vector2, float range)
 {
-    return length(pt) < radius ? 1.0 : 0;
+    return sqrt(vector2.x * vector2.x + vector2.y * vector2.y) < range ? 1.0 : 0.0;
+}
+
+float inSquire(float2 vector2, float min, float max)
+{
+    return min < vector2.x & vector2.x < max &
+        min < vector2.y & vector2.y < max;
 }
 
 [numthreads(8,8,1)]
@@ -33,7 +40,19 @@ void SplitScreen(uint3 id : SV_DispatchThreadID)
 [numthreads(8,8,1)]
 void Circle(uint3 id : SV_DispatchThreadID)
 {
-    int halfRes = texResolution >> 1;
-    float res = inCircle((float2)((int2)id.xy - halfRes), (float)(halfRes));
-    Result[id.xy] = float4(res, res, 0, 1);
+    int halfRes = texResolution >> 1; // 256>>128
+    int radius = halfRes >> 1;
+    float2 center = (float2)((int2)id.xy - halfRes);
+    float res = inCircle(center, radius);
+    Result[id.xy] = float4(res, res, 0, 0);
+}
+
+[numthreads(8,8,1)]
+void Squire(uint3 id : SV_DispatchThreadID)
+{
+    int halfRes = texResolution >> 1; // 256>>128
+    float min = (float)(halfRes >> 1); // 128>>64
+    float max = min * 3; // 192
+    float res = inSquire(id.xy, min, max);
+    Result[id.xy] = float4(0, 0, res, 1);
 }

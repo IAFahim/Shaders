@@ -39,7 +39,8 @@ public class AssignTexture : MonoBehaviour
     {
         _outputTexture = new RenderTexture(texResolution, texResolution, 0)
         {
-            enableRandomWrite = true
+            enableRandomWrite = true,
+            isPowerOfTwo = true,
         };
         _outputTexture.Create();
 
@@ -53,6 +54,7 @@ public class AssignTexture : MonoBehaviour
         // _kernelHandle = shader.FindKernel("SolidRed");
         // _kernelHandle = shader.FindKernel("SolidYellow");
         // _kernelHandle = shader.FindKernel("SplitScreen");
+        
         _kernelHandle = shader.FindKernel("Circle");
         shader.SetTexture(_kernelHandle, Result, _outputTexture);
         shader.SetInt(TexResolution, texResolution);
